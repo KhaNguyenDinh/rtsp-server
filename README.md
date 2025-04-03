@@ -6,4 +6,4 @@ start
 
         npm init //enter đến kết thúc
         npm install
-        node srt/app.js
+        node src/app.js
