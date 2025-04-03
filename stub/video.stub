@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="en" style="overflow: hidden">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Video Player</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            /*background-color: #f0f0f0;*/
+        }
+
+        .video-container {
+            position: relative;
+            width: 100%; /* Điều chỉnh kích thước màn hình video tùy ý */
+            height: 100%; /* Điều chỉnh kích thước màn hình video tùy ý */
+            background-size: cover;
+            background-position: center;
+            background-color: rgba(0, 0, 0, 1);
+        }
+
+        .video-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            display: none;
+        }
+
+        .play-button {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 120px;
+            height: 80px;
+            background-color: red;
+            border: none;
+            border-radius: 20px;
+            cursor: pointer;
+        }
+
+        .play-button::after {
+            content: "";
+            display: block;
+            width: 0;
+            height: 0;
+            border-style: solid;
+            border-width: 20px 0 20px 30px;
+            border-color: transparent transparent transparent white;
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-40%, -50%);
+        }
+
+        .loading-screen {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.8);
+            display: none;
+        }
+
+        .loading-spinner {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            translate: -50% -50%;
+            width: 50px;
+            height: 50px;
+            border: 5px solid #fff;
+            border-radius: 50%;
+            border-top-color: transparent;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+
+    </style>
+    <script type="text/javascript" src="public/jsmpeg.min.js"></script>
+</head>
+<body>
+<div class="video-container" id="video-container">
+    <div class="video-overlay" id="video-overlay"></div>
+    <div class="play-button" id="play-button"></div>
+    <div class="loading-screen" id="loading-screen">
+        <div class="loading-spinner"></div>
+    </div>
+</div>
+<script>
+    const playButton = document.getElementById("play-button");
+    const videoOverlay = document.getElementById("video-overlay");
+    const loadingScreen = document.getElementById("loading-screen");
+
+    playButton.addEventListener("click", function() {
+        playButton.style.display = "none";
+        videoOverlay.style.display = "block";
+        loadingScreen.style.display = "block";
+
+        // Simulate loading time (setTimeout here can be replaced with actual video loading logic)
+        // setTimeout(function() {
+        //     loadingScreen.style.display = "none";
+        //     // Add logic here to show the video player or perform other actions after loading
+        // }, 2000); // Change 2000 to the actual loading time of your video
+        const url = 'url_websocket';
+        const socket = new WebSocket(url);
+        const videoContainer = document.getElementById('video-container');
+        const handleMessage = function () {
+            const canvas = document.createElement("canvas");
+            const player = new JSMpeg.Player(url, {
+                canvas: canvas,
+                videoBufferSize: 1024 * 1024 * 4,
+                onPlay: function (player) {
+                    canvas.style.width = "100%";
+                    canvas.style.height = "100%";
+                    videoContainer.innerHTML = '';
+                    videoContainer.appendChild(canvas);
+                    socket.close();
+                }
+            });
+
+            socket.removeEventListener('message', handleMessage);
+        };
+
+        socket.addEventListener('message', handleMessage);
+    });
+</script>
+</body>
+</html>
